@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import sys
 import os
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -21,7 +22,7 @@ class SigmaSwiperProgram(Ui_SigmaSwiper):
     data = {"TIME":[],
             "ID":[],
             "NAME":[]}
-    today=datetime.datetime.now().strftime("%m/%d/%y")
+    today=datetime.datetime.now().strftime("%m-%d-%y")
     count = 0
     settings = {}
     settings_file=".settings.ini"
@@ -108,7 +109,7 @@ class SigmaSwiperProgram(Ui_SigmaSwiper):
             msg['To'] = toaddr
             msg['Subject'] = "Party List for"+self.today
                
-            body = "Hello,\n Attached is the attendance sheet for our social event on"+self.today+". If any additional information is needed, please contact <insert responsible person here>"
+            body = "Hello,\n Attached is the attendance sheet for our social event on "+self.today+". If any additional information is needed, please contact <insert responsible person here>"
                 
             msg.attach(MIMEText(body, 'plain'))
             filename = file_path.split("/")[-1]
@@ -133,7 +134,7 @@ class SigmaSwiperProgram(Ui_SigmaSwiper):
     def export_data(self):
         export = pd.DataFrame(self.data)        
         export.index += 1
-        fname = QFileDialog.getSaveFileName(None, 'Save Guest Log' , os.path.expanduser('~')+"/Desktop/","Excel Files (*.xlsx)" )
+        fname = QFileDialog.getSaveFileName(None, 'Save Guest Log' , os.path.expanduser('~')+"/Desktop/"+self.today+"_sigep_list.xlsx","Excel Files (*.xlsx)" )
         if fname[0] == '':
             pass
         else:
