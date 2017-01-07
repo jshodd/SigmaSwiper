@@ -1,4 +1,4 @@
-# sigma-swiper
+# sigmaSwiper
 With many events ran by student organizations in colleges, they want to keep track of who is attending their events. This program provides a way to log all guest entries by using the student ID cards and swiping guests in. The program uses pandas to create an Excel file storing all the number of guests, the student ID of each guest, and the time of arrival. A guest list can also be loaded into the program to restrict access to an event, thus saving these organizations even more time. 
 
 ## Current Features
