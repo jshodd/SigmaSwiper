@@ -20,3 +20,4 @@ With many events ran by student organizations in colleges, they want to keep tra
 * Pandas
 * Openpyxl
 * PyQt5
+* Xlrd
