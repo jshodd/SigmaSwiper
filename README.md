@@ -8,6 +8,7 @@ With many events ran by student organizations in colleges, they want to keep tra
 * Automatic emailing of list to a specified address
 * Keeps a current count of the number of guests
 * Displays all current guests in a scrolling list within the GUI
+* Data visualization using matplotlib
 
 ## Possible Future Features
 * Usable without a guestlist
@@ -21,3 +22,4 @@ With many events ran by student organizations in colleges, they want to keep tra
 * Openpyxl
 * PyQt5
 * Xlrd
+* Matplotlib
