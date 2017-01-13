@@ -2,41 +2,57 @@
 import sys
 import os
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, qApp
 import pandas as pd
 import datetime
 import openpyxl
-from sigmaSwiperGui import Ui_SigmaSwiper
+from sigmaSwiperGui import Ui_sigmaSwiper
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 import configparser
+import matplotlib
+matplotlib.use("Qt5Agg", force=True)
+import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt5agg import(
+        FigureCanvasQTAgg as FigureCanvas,
+        )
+import matplotlib.dates as mdates
 
-class SigmaSwiperProgram(Ui_SigmaSwiper):
+class SigmaSwiperProgram(QtWidgets.QMainWindow,Ui_sigmaSwiper):
     
     guest_list = {"ID":[],
                 "NAME":[]}
     has_guest = False
+    has_graph = False
     data = {"TIME":[],
             "ID":[],
             "NAME":[]}
+    graph_x = []
+    graph_y = []
     today=datetime.datetime.now().strftime("%m-%d-%y")
     count = 0
     settings = {}
     settings_file=".settings.ini"
     config = configparser.ConfigParser()
-    def __init__(self,dialog):
-        Ui_SigmaSwiper.__init__(self)
-        self.setupUi(dialog)    
+    fig = plt.Figure(figsize=(6,4))
+    def __init__(self):
+        Ui_sigmaSwiper.__init__(self)
+        QtWidgets.QMainWindow.__init__(self)
+        self.setupUi(self)
         self.submit_button.clicked.connect(self.read_ID)
-        self.export_list_button.clicked.connect(self.export_data)
-        self.load_guest_list_button.clicked.connect(self.input_guest_list)
+        self.action_export_list.triggered.connect(self.export_data)
+        self.action_load_guest_list.triggered.connect(self.input_guest_list)
+        self.action_exit.triggered.connect(qApp.quit)
         self.config.read(self.settings_file)
         self.settings = self.config['settings']
         self.guest_list_check_label.setText("Load a guest list")
-
+        self.id_input.returnPressed.connect(self.read_ID)
+        self.graph_layout = QtWidgets.QVBoxLayout()
+        self.graph_widget.setLayout(self.graph_layout)
     def input_guest_list(self):
         fname = QFileDialog.getOpenFileName(None, 'Open Guestlist' , os.path.expanduser('~')+"/Desktop/", "Excel Files (*.xlsx)")
         if fname[0] == '': 
@@ -59,14 +75,17 @@ class SigmaSwiperProgram(Ui_SigmaSwiper):
                     self.id_input.clear()
                 else:
                     self.count +=1
+                    self.graph_y.append(self.count)
                     self.data["ID"].append(inp)
-                    self.data["TIME"].append(datetime.datetime.now().strftime("%I:%M %p"))
+                    self.data["TIME"].append(datetime.datetime.now().strftime("%H:%M"))
+                    self.graph_x.append(datetime.datetime.now().strftime("%H:%M:%S"))
                     name =self.guest_list["NAME"][self.guest_list["ID"].index(int(inp))]
                     self.data["NAME"].append(name)
                     self.guest_list_check_label.setText("On List")
                     self.guest_list_check_label.setStyleSheet('color: green')
                     self.lcdNumber.display(self.count)
                     self.list_preview.addItem(name+" - "+inp)
+                    self.plot_data()
             else:
                 self.guest_list_check_label.setText("No Guest List Loaded")
                 self.guest_list_check_label.setStyleSheet('color: yellow')
@@ -81,14 +100,17 @@ class SigmaSwiperProgram(Ui_SigmaSwiper):
                     self.id_input.clear()
                 else:
                     self.count +=1
+                    self.graph_y.append(self.count)
                     self.data["ID"].append(inp)
-                    self.data["TIME"].append(datetime.datetime.now().strftime("%I:%M %p"))
+                    self.data["TIME"].append(datetime.datetime.now().strftime("%H:%M"))
+                    self.graph_x.append(datetime.datetime.now().strftime("%H:%M:%S"))
                     name =self.guest_list["NAME"][self.guest_list["ID"].index(int(inp))]
                     self.data["NAME"].append(name)
                     self.guest_list_check_label.setText("On List")
                     self.guest_list_check_label.setStyleSheet('color: green')
                     self.lcdNumber.display(self.count)
                     self.list_preview.addItem(name+" - "+inp)
+                    self.plot_data()
             else:
                 self.guest_list_check_label.setText("No Guest List Loaded")
                 self.guest_list_check_label.setStyleSheet('color: yellow')
@@ -141,9 +163,36 @@ class SigmaSwiperProgram(Ui_SigmaSwiper):
             export.to_excel(fname[0])
         self.email_list(fname[0])
      
+    def plot_data(self):
+        if not self.has_graph:
+            new_x = [mdates.datestr2num(x) for x in self.graph_x]
+            plt.xlabel('Time')
+            plt.ylabel('Count')
+            ax = self.fig.add_subplot(111)
+            ax.plot(new_x, self.graph_y, 'r-')
+            #ax.get_xaxis().set_ticks([])
+            ax.get_yaxis().set_ticks([])
+            self.canvas = FigureCanvas(self.fig)
+            self.graph_layout.addWidget(self.canvas)
+            self.canvas.draw()
+            self.has_graph = True
+        else:
+            self.graph_layout.removeWidget(self.canvas)
+            self.canvas.close()
+            self.fig.clf()
+            plt.xlabel('Time')
+            plt.ylabel('Count')
+            ax = self.fig.add_subplot(111)
+            new_x = [mdates.datestr2num(x) for x in self.graph_x]
+            ax.plot(new_x, self.graph_y, 'r-')
+            ax.get_xaxis().set_ticks([])
+            #ax.get_yaxis().set_ticks([])
+            self.canvas = FigureCanvas(self.fig)
+            self.graph_layout.addWidget(self.canvas)
+            self.canvas.draw()
+
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
-    dialog = QtWidgets.QDialog()
-    prog = SigmaSwiperProgram(dialog)
-    dialog.show()
+    window=SigmaSwiperProgram()
+    window.show()
     sys.exit(app.exec_())
