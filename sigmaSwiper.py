@@ -13,8 +13,6 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 import configparser
-import matplotlib
-matplotlib.use("Qt5Agg", force=True)
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import(
@@ -33,7 +31,7 @@ class SigmaSwiperProgram(QtWidgets.QMainWindow,Ui_sigmaSwiper):
             "NAME":[]}
     graph_x = []
     graph_y = []
-    today=datetime.datetime.now().strftime("%m-%d-%y")
+    today=datetime.datetime.now().strftime("%m_%d_%y")
     count = 0
     settings = {}
     settings_file=".settings.ini"
@@ -122,41 +120,46 @@ class SigmaSwiperProgram(QtWidgets.QMainWindow,Ui_sigmaSwiper):
     
     def email_list(self,file_path):
         if self.settings["send_email"] == "yes":
-            fromaddr = self.settings["from_email"]
-            toaddr = self.settings["to_email"]
-             
-            msg = MIMEMultipart()
-              
-            msg['From'] = fromaddr
-            msg['To'] = toaddr
-            msg['Subject'] = "Party List for"+self.today
-               
-            body = "Hello,\n Attached is the attendance sheet for our social event on "+self.today+". If any additional information is needed, please contact <insert responsible person here>"
-                
-            msg.attach(MIMEText(body, 'plain'))
-            filename = file_path.split("/")[-1]
-            attachment = open(file_path, "rb")
-                  
-            part = MIMEBase('application', 'octet-stream')
-            part.set_payload((attachment).read())
-            encoders.encode_base64(part)
-            part.add_header('Content-Disposition', "attachment; filename= %s" % filename)
-                   
-            msg.attach(part)
-                    
-            server = smtplib.SMTP('smtp.gmail.com', 587)
-            server.starttls()
-            server.login(fromaddr, self.settings["email_password"])
-            text = msg.as_string()
-            server.sendmail(fromaddr, toaddr, text)
-            server.quit()
+            for x in self.settings["to_email"].strip().split(','):
+                try:
+                    toaddr = x.strip()
+                    fromaddr = self.settings["from_email"]
+                     
+                    msg = MIMEMultipart()
+                      
+                    msg['From'] = fromaddr
+                    msg['To'] = toaddr
+                    msg['Subject'] = "Party List for"+self.today
+                       
+                    body = "Hello,\n Attached is the attendance sheet for our social event on "+self.today+". If any additional information is needed, please contact <insert responsible person here>"
+                        
+                    msg.attach(MIMEText(body, 'plain'))
+                    filename = file_path.split("/")[-1]
+                    attachment = open(file_path, "rb")
+                          
+                    part = MIMEBase('application', 'octet-stream')
+                    part.set_payload((attachment).read())
+                    encoders.encode_base64(part)
+                    part.add_header('Content-Disposition', "attachment; filename= %s" % filename)
+                           
+                    msg.attach(part)
+                            
+                    server = smtplib.SMTP('smtp.gmail.com', 587)
+                    server.starttls()
+                    server.login(fromaddr, self.settings["email_password"])
+                    text = msg.as_string()
+                    server.sendmail(fromaddr, toaddr, text)
+                    server.quit()
+                except:
+                    print("email error")
+                    pass
         else:
             pass
     
     def export_data(self):
         export = pd.DataFrame(self.data)        
         export.index += 1
-        fname = QFileDialog.getSaveFileName(None, 'Save Guest Log' , os.path.expanduser('~')+"/Desktop/"+self.today+"_sigep_list.xlsx","Excel Files (*.xlsx)" )
+        fname = QFileDialog.getSaveFileName(None, 'Save Guest Log' , os.path.expanduser('~')+"/Desktop/"+self.today+"_"+self.settings["default_filename"]+".xlsx","Excel Files (*.xlsx)" )
         if fname[0] == '':
             pass
         else:
