@@ -14,6 +14,7 @@ from email.mime.base import MIMEBase
 from email import encoders
 import configparser
 import matplotlib.pyplot as plt
+plt.style.use('fivethirtyeight')
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import(
         FigureCanvasQTAgg as FigureCanvas,
@@ -36,7 +37,7 @@ class SigmaSwiperProgram(QtWidgets.QMainWindow,Ui_sigmaSwiper):
     settings = {}
     settings_file=".settings.ini"
     config = configparser.ConfigParser()
-    fig = plt.Figure(figsize=(6,4))
+    fig = plt.Figure()
     def __init__(self):
         Ui_sigmaSwiper.__init__(self)
         QtWidgets.QMainWindow.__init__(self)
@@ -129,7 +130,7 @@ class SigmaSwiperProgram(QtWidgets.QMainWindow,Ui_sigmaSwiper):
                       
                     msg['From'] = fromaddr
                     msg['To'] = toaddr
-                    msg['Subject'] = "Party List for"+self.today
+                    msg['Subject'] = "Party List for "+self.today
                        
                     body = "Hello,\n Attached is the attendance sheet for our social event on "+self.today+". If any additional information is needed, please contact <insert responsible person here>"
                         
@@ -172,9 +173,10 @@ class SigmaSwiperProgram(QtWidgets.QMainWindow,Ui_sigmaSwiper):
             plt.xlabel('Time')
             plt.ylabel('Count')
             ax = self.fig.add_subplot(111)
+            ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
             ax.plot(new_x, self.graph_y, 'r-')
-            #ax.get_xaxis().set_ticks([])
-            ax.get_yaxis().set_ticks([])
+            ax.get_xaxis().set_ticks([])
+            #ax.get_yaxis().set_ticks([])
             self.canvas = FigureCanvas(self.fig)
             self.graph_layout.addWidget(self.canvas)
             self.canvas.draw()
@@ -186,6 +188,7 @@ class SigmaSwiperProgram(QtWidgets.QMainWindow,Ui_sigmaSwiper):
             plt.xlabel('Time')
             plt.ylabel('Count')
             ax = self.fig.add_subplot(111)
+            ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
             new_x = [mdates.datestr2num(x) for x in self.graph_x]
             ax.plot(new_x, self.graph_y, 'r-')
             ax.get_xaxis().set_ticks([])
