@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QFileDialog, qApp
 import pandas as pd
 import datetime
 import openpyxl
+from openpyxl.drawing.image import Image
 from sigmaSwiperGui import Ui_sigmaSwiper
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -13,6 +14,8 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 import configparser
+import matplotlib
+matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt
 plt.style.use('fivethirtyeight')
 from matplotlib.figure import Figure
