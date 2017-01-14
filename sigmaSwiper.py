@@ -31,7 +31,7 @@ class SigmaSwiperProgram(QtWidgets.QMainWindow,Ui_sigmaSwiper):
             "NAME":[]}
     graph_x = []
     graph_y = []
-    today=datetime.datetime.now().strftime("%m_%d_%y")
+    today=datetime.datetime.now().strftime("%m-%d-%y")
     count = 0
     settings = {}
     settings_file=".settings.ini"
@@ -159,7 +159,7 @@ class SigmaSwiperProgram(QtWidgets.QMainWindow,Ui_sigmaSwiper):
     def export_data(self):
         export = pd.DataFrame(self.data)        
         export.index += 1
-        fname = QFileDialog.getSaveFileName(None, 'Save Guest Log' , os.path.expanduser('~')+"/Desktop/"+self.today+"_"+self.settings["default_filename"]+".xlsx","Excel Files (*.xlsx)" )
+        fname = QFileDialog.getSaveFileName(None, 'Save Guest Log' , os.path.expanduser('~')+"/Desktop/"+self.today+"-"+self.settings["default_filename"]+".xlsx","Excel Files (*.xlsx)" )
         if fname[0] == '':
             pass
         else:
