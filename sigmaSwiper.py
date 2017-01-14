@@ -6,7 +6,6 @@ from PyQt5.QtWidgets import QFileDialog, qApp
 import pandas as pd
 import datetime
 import openpyxl
-from openpyxl.drawing.image import Image
 from sigmaSwiperGui import Ui_sigmaSwiper
 import smtplib
 from email.mime.multipart import MIMEMultipart
