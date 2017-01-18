@@ -24,7 +24,6 @@ from matplotlib.backends.backend_qt5agg import(
 import matplotlib.dates as mdates
 
 class SigmaSwiperProgram(QtWidgets.QMainWindow,Ui_sigmaSwiper):
-    
     guest_list = {"ID":[],
                 "NAME":[]}
     has_guest = False
@@ -56,12 +55,12 @@ class SigmaSwiperProgram(QtWidgets.QMainWindow,Ui_sigmaSwiper):
         self.graph_widget.setLayout(self.graph_layout)
     def input_guest_list(self):
         fname = QFileDialog.getOpenFileName(None, 'Open Guestlist' , os.path.expanduser('~')+"/Desktop/", "Excel Files (*.xlsx)")
-        if fname[0] == '': 
+        if fname[0] == '':
             pass
         else:
             excel_file = pd.ExcelFile(fname[0])
             df = excel_file.parse("Sheet1")
-            self.guest_list["ID"] = df["ID"].tolist()   
+            self.guest_list["ID"] = df["ID"].tolist()
             self.guest_list["NAME"] = df["NAME"].tolist()
             self.has_guest = True
             self.guest_list_check_label.setStyleSheet('color: white')
@@ -85,13 +84,18 @@ class SigmaSwiperProgram(QtWidgets.QMainWindow,Ui_sigmaSwiper):
                     self.guest_list_check_label.setText("On List")
                     self.guest_list_check_label.setStyleSheet('color: green')
                     self.lcdNumber.display(self.count)
-                    self.list_preview.addItem(name+" - "+inp)
+                    self.list_preview.addItem(name+"      -      "+inp)
                     self.plot_data()
+                    #if self.count % 10 == 0:
+                     #   export = pd.DataFrame(self.data)        
+                      #  export.index += 1
+                       # fname = os.path.expanduser('~')+'/Desktop/temp/.xlsx'
+                        #export.to_excel(fname[0])
             else:
                 self.guest_list_check_label.setText("No Guest List Loaded")
                 self.guest_list_check_label.setStyleSheet('color: yellow')
                 self.id_input.clear()
-            
+
         elif len(inp) == 13:
             inp = inp[4:10]
             if self.has_guest:
@@ -112,6 +116,11 @@ class SigmaSwiperProgram(QtWidgets.QMainWindow,Ui_sigmaSwiper):
                     self.lcdNumber.display(self.count)
                     self.list_preview.addItem(name+" - "+inp)
                     self.plot_data()
+                    #if self.count % 10 == 0:
+                     #   export = pd.DataFrame(self.data)        
+                      #  export.index += 1
+                       # fname =  os.path.expanduser('~')+"/Desktop/temp.xlsx"
+                        #export.to_excel(fname[0])
             else:
                 self.guest_list_check_label.setText("No Guest List Loaded")
                 self.guest_list_check_label.setStyleSheet('color: yellow')
@@ -120,33 +129,29 @@ class SigmaSwiperProgram(QtWidgets.QMainWindow,Ui_sigmaSwiper):
             self.guest_list_check_label.setText("Invalid Input")
             self.guest_list_check_label.setStyleSheet('color: yellow')
         self.id_input.clear()
-    
+
     def email_list(self,file_path):
         if self.settings["send_email"] == "yes":
             for x in self.settings["to_email"].strip().split(','):
                 try:
                     toaddr = x.strip()
                     fromaddr = self.settings["from_email"]
-                     
+
                     msg = MIMEMultipart()
-                      
                     msg['From'] = fromaddr
                     msg['To'] = toaddr
                     msg['Subject'] = "Party List for "+self.today
-                       
+
                     body = "Hello,\n Attached is the attendance sheet for our social event on "+self.today+". If any additional information is needed, please contact <insert responsible person here>"
-                        
+
                     msg.attach(MIMEText(body, 'plain'))
                     filename = file_path.split("/")[-1]
                     attachment = open(file_path, "rb")
-                          
                     part = MIMEBase('application', 'octet-stream')
                     part.set_payload((attachment).read())
                     encoders.encode_base64(part)
                     part.add_header('Content-Disposition', "attachment; filename= %s" % filename)
-                           
                     msg.attach(part)
-                            
                     server = smtplib.SMTP('smtp.gmail.com', 587)
                     server.starttls()
                     server.login(fromaddr, self.settings["email_password"])
@@ -158,9 +163,8 @@ class SigmaSwiperProgram(QtWidgets.QMainWindow,Ui_sigmaSwiper):
                     pass
         else:
             pass
-    
     def export_data(self):
-        export = pd.DataFrame(self.data)        
+        export = pd.DataFrame(self.data)
         export.index += 1
         fname = QFileDialog.getSaveFileName(None, 'Save Guest Log' , os.path.expanduser('~')+"/Desktop/"+self.today+"-"+self.settings["default_filename"]+".xlsx","Excel Files (*.xlsx)" )
         if fname[0] == '':
@@ -168,7 +172,6 @@ class SigmaSwiperProgram(QtWidgets.QMainWindow,Ui_sigmaSwiper):
         else:
             export.to_excel(fname[0])
         self.email_list(fname[0])
-     
     def plot_data(self):
         if not self.has_graph:
             new_x = [mdates.datestr2num(x) for x in self.graph_x]
