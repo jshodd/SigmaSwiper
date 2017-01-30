@@ -49,6 +49,7 @@ class SigmaSwiperProgram(QtWidgets.QMainWindow,Ui_sigmaSwiper):
         self.action_exit.triggered.connect(qApp.quit)
         self.config.read(self.settings_file)
         self.settings = self.config['settings']
+        self.guest_list_check_label.setStyleSheet('color: black')
         self.guest_list_check_label.setText("Load a guest list")
         self.id_input.returnPressed.connect(self.read_ID)
         self.graph_layout = QtWidgets.QVBoxLayout()
@@ -63,7 +64,7 @@ class SigmaSwiperProgram(QtWidgets.QMainWindow,Ui_sigmaSwiper):
             self.guest_list["ID"] = df["ID"].tolist()
             self.guest_list["NAME"] = df["NAME"].tolist()
             self.has_guest = True
-            self.guest_list_check_label.setStyleSheet('color: white')
+            self.guest_list_check_label.setStyleSheet('color: black')
             self.guest_list_check_label.setText("Guest List Loaded")
     def read_ID(self):
         inp = self.id_input.text()
